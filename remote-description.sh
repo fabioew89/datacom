@@ -5,7 +5,7 @@ for host in {1..5}; do
     sshpass -f 'password' ssh -o StrictHostKeyChecking=no fabio.ewerton@100.127.0.$host  \
     'sh run hostname ; show interface description | include [A-Z] | exclude "CHASSIS|ID"'
     echo ''
-    for i in $( seq 15 ); do
+    for _ in $( seq 15 ); do
         echo -n "#####"
     done
     echo ''
