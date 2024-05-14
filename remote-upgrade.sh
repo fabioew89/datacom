@@ -17,12 +17,6 @@ ssh_output(){
     get_device_firmware_version="$(echo "$ssh_output" | grep Active | cut -d "-" -f 1)"
 }
 
-firmware_check_version(){
-    [ "$get_device_firmware_version" -ge 8 ] && \
-    echo -e "${GREEN}\nUp to date! 😁${RESET}" || \
-    echo -e "${YELLOW}\nNeeds updating! 😭${RESET}"
-}
-
 firmware_check_version_check() {
     # Extrai a parte numérica da versão do firmware
     firmware_version=$(echo "$get_device_firmware_version" | awk -F. '{print $1"."$2}')
@@ -38,12 +32,11 @@ firmware_check_version_check() {
 
 
 for ip_host in 100.127.0.{1..100}; do
-    if ping -c 3 -q -W 3 "$ip_host" > /dev/null; then
+    if ping -c 3 -q -W 3 "$ip_host" > /dev/null 2>&1; then
+        echo -e "${GREEN}\n[INFO] - Geting information about $get_device_hostname - $ip_host${RESET}\n\
+        \n$get_device_hostname\n$get_device_firmware\n"        
         
         ssh_output
-        
-        echo -e "${GREEN}\n[INFO] - Geting information about $get_device_hostname - $ip_host${RESET}\n\
-        \n$get_device_hostname\n$get_device_firmware\n"
         
         firmware_check_version_check
 
