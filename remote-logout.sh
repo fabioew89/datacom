@@ -3,7 +3,7 @@
 USERNAME="fabio.ewerton"
 HOST="100.127.0.2"
 
-for host in {1..10}; do
+for _ in {1..10}; do
     if ping -c 3 -W 3 -q $HOST > /dev/null; then
 
         echo -e "\n\e[32m[INFO] - Equipamento $HOST esta Online!\e[0m"
