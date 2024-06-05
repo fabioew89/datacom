@@ -2,23 +2,13 @@
 
 USERNAME="fabio.ewerton"
 HOST="100.127.0.2"
+SESSION="7694650"
 
 for _ in {1..10}; do
-    if ping -c 3 -W 3 -q $HOST > /dev/null; then
+    ping -c 3 -W 3 -q $HOST > /dev/null && \
+    sshpass -f password ssh -o StrictHostKeyChecking=no \
+    $USERNAME@$HOST "logout session $SESSION"
 
-        echo -e "\n\e[32m[INFO] - Equipamento $HOST esta Online!\e[0m"
-        
-        sshpass -f password ssh -o StrictHostKeyChecking=no $USERNAME@$HOST \
-        "logout user $USERNAME"
-
-    else 
-        echo -e "\e[31m[INFO] - Equipamento $HOST NÃO esta Online!\e[0m"
-    fi
-
-
-    echo
-    for i in $( seq 10 ); do
-        echo -n "##### "
-    done
-    echo
+    echo "logout session executado com sucesso!!!"
+    # echo ; for _ in $( seq 10 ); do echo -n "##### " ; done ; echo
 done
