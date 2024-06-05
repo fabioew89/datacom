@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
 USERNAME="fabio.ewerton"
-COMMAND="show running-config hostname ;\
+COMMAND="show running-config hostname ; \
          show running-config aaa"
+
+prefix="100.127.0."         
+
          
 aaa_pass_admin=$(cat password | awk 'NR == 2')
 aaa_pass_tacacs=$(cat password | awk 'NR == 3')
@@ -28,22 +31,20 @@ ssh_config(){
     "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
 }
 
-for ip_address in 100.127.0.{1..110}; do
+for ip in {1..254}; do
+
+    ip_address="${prefix}${ip}"
+
     if ping -c 3 -q -W 3 "$ip_address" > /dev/null 2>&1; then
        
         ssh_output
 
-        echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
-        
-        if [ "$get_device_aaa_pass_admin" == "$aaa_pass_admin" ] && \
-           [ "$get_device_aaa_pass_tacacs" == "$aaa_pass_tacacs" ]; then
+        if [ "$get_device_aaa_pass_admin" != "$aaa_pass_admin" ] || \
+           [ "$get_device_aaa_pass_tacacs" != "$aaa_pass_tacacs" ]; then
             
-            echo -e "\n${GREEN}$get_device_aaa_users${RESET}"
-            
-        else
-
+            echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
+            echo -e "\n${YELLOW}As senhas AAA são diferentes para $ip_address${RESET}"
             echo -e "\n${YELLOW}$get_device_aaa_users${RESET}"
-
         fi
         
     else
@@ -51,9 +52,5 @@ for ip_address in 100.127.0.{1..110}; do
     fi
 
     # JUST SEPARATOR
-    echo
-    for _ in $(seq 15 ); do
-        echo -n "##### "
-    done
-    echo
+    # echo ; for _ in $(seq 15 ); do echo -n "##### " ; done ; echo
 done
