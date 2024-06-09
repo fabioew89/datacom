@@ -5,8 +5,7 @@ COMMAND="show running-config hostname ; \
          show running-config aaa"
 
 prefix="100.127.0."         
-
-         
+      
 aaa_pass_admin=$(cat password | awk 'NR == 2')
 aaa_pass_tacacs=$(cat password | awk 'NR == 3')
 
