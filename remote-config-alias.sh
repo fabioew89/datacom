@@ -21,11 +21,10 @@
 # |                               VARIABLES                                 |
 # +-------------------------------------------------------------------------+
 
+TRASH="/dev/null"
+# SLEEP="sleep 2"
 USERNAME="fabio.ewerton"
 COMMAND="show running-config hostname"
-
-# SLEEP="sleep 2"
-TRASH="/dev/null"
 
 prefix="100.127.0." #prefixo ipv4 /24?
 
