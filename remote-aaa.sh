@@ -1,41 +1,35 @@
 #!/usr/bin/env bash
 
 USERNAME="fabio.ewerton"
-COMMAND="show running-config hostname ; \
-         show running-config aaa"
-
+COMMAND="show running-config hostname ; show running-config aaa"
 prefix="100.127.0."         
       
-aaa_pass_admin=$(cat password | awk 'NR == 2')
-aaa_pass_noc=$(cat password | awk 'NR == 3')
-aaa_pass_tacacs=$(cat password | awk 'NR == 4')
-aaa_pass_tacacs_new=$(cat password | awk 'NR == 5')
-
 RED="\e[31;1m"
 GREEN="\e[32;1m"
 YELLOW="\e[33;1m"
 RESET="\e[0m"
 
 ssh_output(){
-    ssh_output="$(sshpass -f password ssh -o StrictHostKeyChecking=no "$USERNAME"@"$ip_address" "$COMMAND")"
+    ssh_output="$(sshpass -f password ssh -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR \
+    "$USERNAME"@"$ip_address" "$COMMAND")"
+
     get_device_hostname="$(echo "$ssh_output" | awk 'NR==1 { print $2 }')"
     
-    get_device_aaa_local_pass=$(echo "$ssh_output" | grep -i password | awk '{ print $2 }')
-    get_device_aaa_remote_pass=$(echo "$ssh_output" | grep -i shared-secret | awk '{ print $2 }')
+    get_device_aaa_pass_local=$(echo "$ssh_output" | grep -i password | awk '{ print $2 }')
+    get_device_aaa_pass_remote=$(echo "$ssh_output" | grep -i shared-secret | awk '{ print $2 }')
     
-    get_device_aaa_users=$(echo "$ssh_output" | grep -i aaa | awk 'NR > 1 { print $3 }')
-    # get_device_aaa_user_luan=$(echo "$ssh_output" | grep -i luan | awk '{ print $3 }')
+    get_device_aaa_users_local=$(echo "$ssh_output" | grep -i user | awk '{ print $3 }')
+    get_device_aaa_users_remote=$(echo "$ssh_output" | grep -i server | awk '{ print $4 }')
 
-    # echo -e "$get_device_aaa_local_pass"
-    # echo -e "$get_device_aaa_remote_pass"
-    # echo
-    # echo -e "$get_device_aaa_users"
-    
-    # echo
-    # echo -e "$aaa_pass_admin"
-    # echo -e "$aaa_pass_noc"
-    # echo -e "$aaa_pass_tacacs"
-    # echo -e "$aaa_pass_tacacs_new"
+    local_passwords=$(awk 'NR > 1' password)
+
+    TEMP_FILE=$(mktemp)
+    echo "$get_device_aaa_pass_local" > "$TEMP_FILE"
+    echo "$get_device_aaa_pass_remote" >> "$TEMP_FILE"
+    temp_local_passwords=$(cat "$TEMP_FILE")
+    rm -f "$TEMP_FILE"
+
 }
 
 # ssh_config(){
@@ -43,25 +37,25 @@ ssh_output(){
 #     "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
 # }
 
-for ip in {4..4}; do
+for ip in {2..4}; do
 
     ip_address="${prefix}${ip}"
 
     if ping -c 3 -q -W 3 "$ip_address" > /dev/null 2>&1; then
-        # ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$ip_address" > /dev/null 2>&1
+        ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$ip_address" > /dev/null 2>&1
        
         ssh_output
 
-        if [ "$get_device_aaa_local_pass" != "$aaa_pass_admin" ] || \
-           [ "$get_device_aaa_remote_pass" != "$aaa_pass_tacacs" ]; then
+        if [ "$local_passwords" != "$temp_local_passwords" ]; then
             
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
-            echo -e "\n${YELLOW}As senhas AAA são diferentes para $ip_address${RESET}"
-            echo -e "\n${YELLOW}$get_device_aaa_users${RESET}"
-        
-        # else
-        #     echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
-        #     echo -e "\n${GREEN}$get_device_aaa_users${RESET}"
+            echo -e "\n${YELLOW}The passwords AAA are different to $ip_address${RESET}\n"
+            echo -e "${YELLOW}$get_device_aaa_users_local${RESET}"
+            echo -e "${YELLOW}$get_device_aaa_users_remote${RESET}"        
+        else
+            echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}\n"
+            echo -e "${GREEN}$get_device_aaa_users_local${RESET}"
+            echo -e "${GREEN}$get_device_aaa_users_remote${RESET}"
         fi
         
     else
@@ -69,5 +63,7 @@ for ip in {4..4}; do
     fi
 
     # JUST SEPARATOR
-    # echo ; for _ in $(seq 15 ); do echo -n "##### " ; done ; echo
+    echo
+    for _ in $(seq 15); do echo -n "##### "; done
+    echo
 done
