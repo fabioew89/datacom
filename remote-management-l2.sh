@@ -14,35 +14,35 @@
 # |                               DESCRIPTION                               |
 # +-------------------------------------------------------------------------+
 
-# Este script efetua a configuração padrão de 'alias' nos equipamentos DMOS \
-# na rede que estão com a loopback 100.127.0.0/24
+# Este script faz o levantamento de todos os equipamentos da antiga gerencia \
+# l2, no caso a rede que já não é para ficar online, 172.25.8.x/24
 
 # +-------------------------------------------------------------------------+
 # |                               VARIABLES                                 |
 # +-------------------------------------------------------------------------+
 
-TRASH="/dev/null"
-# SLEEP="sleep 2"
 USERNAME="fabio.ewerton"
-COMMAND="show running-config hostname"
+COMMAND="show running-config | include hostname"
+TRASH="/dev/null"
+SLEEP="sleep 2"
 
-prefix="100.127.0." #prefixo ipv4 /24?
+prefix="172.25.8." #prefixo ipv4 /24?
 
 # +-------------------------------------------------------------------------+
 # |                               FUNCTIONS                                 |
 # +-------------------------------------------------------------------------+
 
 ssh_output(){
-    ssh_output="$(sshpass -f password ssh -o StrictHostKeyChecking=no \
-    "$USERNAME"@"$ip_address" "$COMMAND")" > "$TRASH"
+    ssh_output="$(sshpass -f password ssh \
+    -o StrictHostKeyChecking=no \
+    -o KexAlgorithms=+diffie-hellman-group1-sha1 \
+    -o HostKeyAlgorithms=+ssh-dss \
+    "$USERNAME"@"$ip_address" "$COMMAND")" # > "$TRASH"
     
-    get_device_hostname="$(echo "$ssh_output" | grep -i hostname | cut -d ' ' -f 2)"
-    echo -e "$get_device_hostname - $ip_address"
-}
+    # get_device_hostname="$(echo "$ssh_output")"
+    # echo -e "$get_device_hostname - $ip_address" # hostname?
+    echo -e "$ssh_output"
 
-config-alias() {
-    ssh_output="$(sshpass -f password ssh -o StrictHostKeyChecking=no \
-    "$USERNAME"@"$ip_address" < "config/config-dmos-alias.conf")"
 }
 
 # +-------------------------------------------------------------------------+
@@ -53,15 +53,12 @@ for ip in {1..254}; do
     
     ip_address="${prefix}${ip}"
     
-    if ping -c 3 -W 3 -q "$ip_address" > "$TRASH"; then
-        ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$ip_address"
-        
-        ssh_output
-        config-alias
+    if ping -c 1 -q "$ip_address" > "$TRASH"; then
+        echo -e "$ip_address" >> gerencia_l2.txt
     fi
 
     # JUST SEPARATOR
-    echo ; for _ in $(seq 15); do echo -n "##### " ; done ; echo    
+    # echo ; for _ in $(seq 15); do echo -n "##### " ; done ; echo    
 done
 
 # +-------------------------------------------------------------------------+

@@ -19,7 +19,7 @@ for host in 100.127.0.{1..90}; do
     fi
 
     echo
-    for i in $( seq 10 ); do
+    for _ in $( seq 10 ); do
         echo -n "#####"
     done
     echo
