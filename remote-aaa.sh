@@ -2,7 +2,8 @@
 
 USERNAME="fabio.ewerton"
 COMMAND="show running-config hostname ; show running-config aaa"
-prefix="100.127.0."         
+
+PREFIX="100.127.0."         
       
 RED="\e[31;1m"
 GREEN="\e[32;1m"
@@ -37,9 +38,9 @@ ssh_output(){
 #     "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
 # }
 
-for ip in {2..4}; do
+for ip in {1..10}; do
 
-    ip_address="${prefix}${ip}"
+    ip_address="${PREFIX}${ip}"
 
     if ping -c 3 -q -W 3 "$ip_address" > /dev/null 2>&1; then
         ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$ip_address" > /dev/null 2>&1
