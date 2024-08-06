@@ -38,7 +38,7 @@ ssh_output(){
 #     "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
 # }
 
-for ip in {1..10}; do
+for ip in {1..5}; do
 
     ip_address="${PREFIX}${ip}"
 
@@ -52,7 +52,9 @@ for ip in {1..10}; do
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
             echo -e "\n${YELLOW}The passwords AAA are different to $ip_address${RESET}\n"
             echo -e "${YELLOW}$get_device_aaa_users_local${RESET}"
-            echo -e "${YELLOW}$get_device_aaa_users_remote${RESET}"        
+            echo -e "${YELLOW}$get_device_aaa_users_remote${RESET}"
+            
+            ssh_config # configura tacacs?
         else
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}\n"
             echo -e "${GREEN}$get_device_aaa_users_local${RESET}"
