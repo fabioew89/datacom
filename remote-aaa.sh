@@ -4,7 +4,7 @@ USERNAME="fabio.ewerton"
 COMMAND="show running-config hostname ; show running-config aaa"
 
 PREFIX="100.127.0."         
-      
+
 RED="\e[31;1m"
 GREEN="\e[32;1m"
 YELLOW="\e[33;1m"
@@ -17,11 +17,11 @@ ssh_output(){
 
     get_device_hostname="$(echo "$ssh_output" | awk 'NR==1 { print $2 }')"
     
-    get_device_aaa_pass_local=$(echo "$ssh_output" | grep -i password | awk '{ print $2 }')
-    get_device_aaa_pass_remote=$(echo "$ssh_output" | grep -i shared-secret | awk '{ print $2 }')
-    
     get_device_aaa_users_local=$(echo "$ssh_output" | grep -i user | awk '{ print $3 }')
     get_device_aaa_users_remote=$(echo "$ssh_output" | grep -i server | awk '{ print $4 }')
+
+    get_device_aaa_pass_local=$(echo "$ssh_output" | grep -i password | awk '{ print $2 }')
+    get_device_aaa_pass_remote=$(echo "$ssh_output" | grep -i shared-secret | awk '{ print $2 }')
 
     local_passwords=$(awk 'NR > 1' password)
 
@@ -33,10 +33,10 @@ ssh_output(){
 
 }
 
-# ssh_config(){
-#     sshpass -f password ssh -o StrictHostKeyChecking=no -tt \
-#     "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
-# }
+ssh_config(){
+    sshpass -f password ssh -o StrictHostKeyChecking=no -tt \
+    "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
+}
 
 for ip in {1..5}; do
 
@@ -57,6 +57,7 @@ for ip in {1..5}; do
             ssh_config # configura tacacs?
         else
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}\n"
+            echo -e "\n${GREEN}The passwords AAA are ecqual to $ip_address${RESET}\n"            
             echo -e "${GREEN}$get_device_aaa_users_local${RESET}"
             echo -e "${GREEN}$get_device_aaa_users_remote${RESET}"
         fi
@@ -66,7 +67,5 @@ for ip in {1..5}; do
     fi
 
     # JUST SEPARATOR
-    echo
-    for _ in $(seq 15); do echo -n "##### "; done
-    echo
+    echo; for _ in $(seq 15); do echo -n "##### "; done ; echo
 done
