@@ -28,33 +28,33 @@ ssh_output(){
     TEMP_FILE=$(mktemp)
     echo "$get_device_aaa_pass_local" > "$TEMP_FILE"
     echo "$get_device_aaa_pass_remote" >> "$TEMP_FILE"
-    temp_local_passwords=$(cat "$TEMP_FILE")
+    local_passwords_temp=$(cat "$TEMP_FILE")
     rm -f "$TEMP_FILE"
 
 }
 
 ssh_config(){
-    sshpass -f password ssh -o StrictHostKeyChecking=no -tt \
+    sshpass -f password ssh -o StrictHostKeyChecking=no \
     "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.conf"
 }
 
-for ip in {1..5}; do
+for ip in {1..1}; do
 
     ip_address="${PREFIX}${ip}"
 
     if ping -c 3 -q -W 3 "$ip_address" > /dev/null 2>&1; then
         ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$ip_address" > /dev/null 2>&1
        
-        ssh_output
+        ssh_output # make ssh access and create variables
 
-        if [ "$local_passwords" != "$temp_local_passwords" ]; then
+        if [ "$local_passwords" != "$local_passwords_temp" ]; then
             
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
             echo -e "\n${YELLOW}The passwords AAA are different to $ip_address${RESET}\n"
             echo -e "${YELLOW}$get_device_aaa_users_local${RESET}"
             echo -e "${YELLOW}$get_device_aaa_users_remote${RESET}"
             
-            ssh_config # configura tacacs?
+            # ssh_config # config tacacs?
         else
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}\n"
             echo -e "\n${GREEN}The passwords AAA are ecqual to $ip_address${RESET}\n"            
