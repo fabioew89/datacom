@@ -35,7 +35,7 @@ ssh_output(){
 
 ssh_config(){
     sshpass -f password ssh -o StrictHostKeyChecking=no -tt \
-    "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.md"
+    "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.conf"
 }
 
 for ip in {1..5}; do
