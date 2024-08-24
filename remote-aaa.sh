@@ -35,10 +35,11 @@ ssh_output(){
 
 ssh_config(){
     sshpass -f password ssh -o StrictHostKeyChecking=no \
-    "$USERNAME"@"$ip_address" < "config/config-dmos-aaa.conf"
+    -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR \
+    "$USERNAME"@"$ip_address" < "config/dmos-aaa-user-noc.conf"
 }
 
-for ip in {1..1}; do
+for ip in {1..10}; do
 
     ip_address="${PREFIX}${ip}"
 
@@ -52,9 +53,9 @@ for ip in {1..1}; do
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}"
             echo -e "\n${YELLOW}The passwords AAA are different to $ip_address${RESET}\n"
             echo -e "${YELLOW}$get_device_aaa_users_local${RESET}"
-            echo -e "${YELLOW}$get_device_aaa_users_remote${RESET}"
+            echo -e "${YELLOW}$get_device_aaa_users_remote${RESET}\n"
             
-            # ssh_config # config tacacs?
+            ssh_config # config tacacs?
         else
             echo -e "\n${GREEN}[INFO] - Geting information about $get_device_hostname - $ip_address${RESET}\n"
             echo -e "\n${GREEN}The passwords AAA are ecqual to $ip_address${RESET}\n"            
